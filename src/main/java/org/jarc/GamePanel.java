@@ -1,15 +1,19 @@
 package org.jarc;
 
+import org.jarc.util.Utils2D;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class GamePanel extends JPanel implements Runnable {
 
     final int panelDimWidth = 600, panelDimHeight = 600;
-    private Snake snake;
+    final private Snake snake;
     private Thread gameThread;
     private boolean runGameLoop = true;
     private InputHandler inputHandler = new InputHandler();
+    final private SnakeFood food;
+    private double distanceDiff;
 
     public GamePanel(){
 
@@ -17,6 +21,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.setPreferredSize(new Dimension(this.panelDimWidth, this.panelDimHeight));
         this.setBackground(Color.BLACK);
         this.snake = new Snake(this);
+        this.food = new SnakeFood(snake.width, this);
         this.addKeyListener(inputHandler);
         this.setFocusable(true);
     }
@@ -31,7 +36,7 @@ public class GamePanel extends JPanel implements Runnable {
             repaint();
             try {
 
-                Thread.sleep(17);
+                Thread.sleep(20);
             } catch (InterruptedException e) {
 
                 e.printStackTrace();
@@ -47,12 +52,16 @@ public class GamePanel extends JPanel implements Runnable {
         Graphics2D graphics2D = (Graphics2D) graphics;
 
         snake.draw(graphics2D);
+        food.draw(graphics2D);
         graphics2D.dispose();
     }
 
     public void update(){
 
         snake.move();
+        distanceDiff = Utils2D.distance(snake.currentX, snake.currentY, food.originX, food.originY);
+        if(distanceDiff > 0 && distanceDiff < 10)
+            food.generate();
     }
 
     public void startGameThread(){
